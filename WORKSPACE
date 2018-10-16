@@ -117,6 +117,91 @@ go_repository(
 )
 
 # External dependencies
+new_git_repository(
+    name = "mcl",
+    remote = "https://github.com/herumi/mcl",
+    commit = "fe95b63cc450bc1eb0459dda916a858b5442a258",
+    build_file_content = """
+cc_library(
+  name = "mcl-lib",
+  srcs = [
+    "src/bn_c256.cpp",
+    "src/bn_c384.cpp",
+    "src/bn_c512.cpp",
+    "src/ecdsa_c.cpp",
+    "src/fp.cpp",
+    "src/gen.cpp",
+    "src/she_c256.cpp",
+    "src/she_c384.cpp",
+  ],
+  hdrs = [
+    "src/bn_c_impl.hpp",
+    "src/fp_generator.hpp",
+    "src/llvm_gen.hpp",
+    "src/low_func.hpp",
+    "src/low_func_llvm.hpp",
+    "src/proto.hpp",
+    "src/she_c_impl.hpp",
+    "src/xbyak/xbyak.h",
+    "src/xbyak/xbyak_mnemonic.h",
+    "src/xbyak/xbyak_util.h",
+    "include/mcl/aggregate_sig.hpp",
+    "include/mcl/ahe.hpp",
+    "include/mcl/array.hpp",
+    "include/mcl/bn.h",
+    "include/mcl/bn.hpp",
+    "include/mcl/bn256.hpp",
+    "include/mcl/bn384.hpp",
+    "include/mcl/bn512.hpp",
+    "include/mcl/conversion.hpp",
+    "include/mcl/curve_type.h",
+    "include/mcl/ec.hpp",
+    "include/mcl/ecdsa.h",
+    "include/mcl/ecdsa.hpp",
+    "include/mcl/ecparam.hpp",
+    "include/mcl/elgamal.hpp",
+    "include/mcl/fp.hpp",
+    "include/mcl/fp_tower.hpp",
+    "include/mcl/gmp_util.hpp",
+    "include/mcl/lagrange.hpp",
+    "include/mcl/op.hpp",
+    "include/mcl/operator.hpp",
+    "include/mcl/paillier.hpp",
+    "include/mcl/randgen.hpp",
+    "include/mcl/she.h",
+    "include/mcl/she.hpp",
+    "include/mcl/util.hpp",
+    "include/mcl/vint.hpp",
+    "include/mcl/window_method.hpp",
+    "include/cybozu/array.hpp",
+    "include/cybozu/atoi.hpp",
+    "include/cybozu/benchmark.hpp",
+    "include/cybozu/bit_operation.hpp",
+    "include/cybozu/critical_section.hpp",
+    "include/cybozu/crypto.hpp",
+    "include/cybozu/endian.hpp",
+    "include/cybozu/exception.hpp",
+    "include/cybozu/hash.hpp",
+    "include/cybozu/inttype.hpp",
+    "include/cybozu/itoa.hpp",
+    "include/cybozu/link_libeay32.hpp",
+    "include/cybozu/link_mpir.hpp",
+    "include/cybozu/link_ssleay32.hpp",
+    "include/cybozu/mutex.hpp",
+    "include/cybozu/option.hpp",
+    "include/cybozu/random_generator.hpp",
+    "include/cybozu/serializer.hpp",
+    "include/cybozu/sha2.hpp",
+    "include/cybozu/stream.hpp",
+    "include/cybozu/test.hpp",
+    "include/cybozu/unordered_map.hpp",
+    "include/cybozu/xorshift.hpp",
+  ],
+  includes = ["include", "src/xbyak"],
+  visibility = ["//visibility:public"],
+)
+"""
+)
 
 go_repository(
     name = "com_github_ethereum_go_ethereum",
@@ -130,6 +215,12 @@ go_repository(
     vcs = "git",
     # Last updated September 09, 2018
     commit = "f4b3f83362a4cf2928e57914af040aea76c8a7d6",
+)
+
+git_repository(
+    name = "com_github_prysmaticlabs_bls",
+    remote = "https://github.com/prysmaticlabs/bls",
+    commit = "c1480823a672f5f73f2389ceb08bb1281a64c198",
 )
 
 go_repository(

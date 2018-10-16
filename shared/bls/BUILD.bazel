@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["bls.go"],
+    cdeps = ["@com_github_prysmaticlabs_bls//:bls-lib"],
+    cgo = True,
+    copts = ["-Iinclude -DBLS_MAX_OP_UNIT_SIZE=6"],
+    importpath = "github.com/prysmaticlabs/prysm/shared/bls",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["bls_test.go"],
+    embed = [":go_default_library"],
+)
