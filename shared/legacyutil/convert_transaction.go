@@ -1,4 +1,4 @@
-// This package exists to convert Ethererum 2.0 types to go-ethereum or
+// Package legacyutil exists to convert Ethererum 2.0 types to go-ethereum or
 // Ethereum 1.0 types.
 package legacyutil
 
@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	gethTypes "github.com/ethereum/go-ethereum/core/types"
-	pb "github.com/prysmaticlabs/prysm/proto/sharding/v1"
+	pb "github.com/prysmaticlabs/prysm/proto/sharding/p2p/v1"
 )
 
 // TransformTransaction of proto transaction to geth's transction.

@@ -2,22 +2,80 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "io_bazel_rules_go",
-    urls = ["https://github.com/bazelbuild/rules_go/releases/download/0.13.0/rules_go-0.13.0.tar.gz"],
-    sha256 = "ba79c532ac400cefd1859cbc8a9829346aa69e3b99482cd5a54432092cbc3933",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.15.4/rules_go-0.15.4.tar.gz",
+    sha256 = "7519e9e1c716ae3c05bd2d984a42c3b02e690c5df728dc0a84b23f90c355c5a1",
 )
 
 http_archive(
     name = "bazel_gazelle",
-    urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.13.0/bazel-gazelle-0.13.0.tar.gz"],
-    sha256 = "bc653d3e058964a5a26dcad02b6c72d7d63e6bb88d94704990b908a1445b8758",
+    urls = ["https://github.com/bazelbuild/bazel-gazelle/releases/download/0.14.0/bazel-gazelle-0.14.0.tar.gz"],
+    sha256 = "c0a5739d12c6d05b6c1ad56f2200cb0b57c5a70e03ebd2f7b87ce88cabf09c7b",
 )
 
 http_archive(
-    name = "io_bazel_rules_docker",
-    sha256 = "6dede2c65ce86289969b907f343a1382d33c14fbce5e30dd17bb59bb55bb6593",
-    strip_prefix = "rules_docker-0.4.0",
-    urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.4.0.tar.gz"],
+    name = "com_github_atlassian_bazel_tools",
+    strip_prefix = "bazel-tools-6fef37f33dfa0189be9df4d3d60e6291bfe71177",
+    urls = ["https://github.com/atlassian/bazel-tools/archive/6fef37f33dfa0189be9df4d3d60e6291bfe71177.zip"],
 )
+
+git_repository(
+    name = "io_bazel_rules_docker",
+    commit = "7401cb256222615c497c0dee5a4de5724a4f4cc7",  # 2018-06-22
+    remote = "https://github.com/bazelbuild/rules_docker.git",
+)
+
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_repositories")
+
+docker_repositories()
+
+git_repository(
+    name = "build_bazel_rules_nodejs",
+    remote = "https://github.com/bazelbuild/rules_nodejs.git",
+    tag = "0.15.0",
+)
+
+load("@build_bazel_rules_nodejs//:package.bzl", "rules_nodejs_dependencies")
+
+rules_nodejs_dependencies()
+
+load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories", "yarn_install")
+
+node_repositories()
+
+yarn_install(
+    name = "npm",
+    package_json = "//:package.json",
+    yarn_lock = "//:yarn.lock",
+)
+
+# This requires rules_docker to be fully instantiated before it is pulled in.
+git_repository(
+    name = "io_bazel_rules_k8s",
+    commit = "2054f7bf4d51f9e439313c56d7a208960a8a179f",  # 2018-07-29
+    remote = "https://github.com/bazelbuild/rules_k8s.git",
+)
+
+load("@io_bazel_rules_k8s//k8s:k8s.bzl", "k8s_repositories", "k8s_defaults")
+
+k8s_repositories()
+
+_CLUSTER = "minikube"
+
+_NAMESPACE = "default"
+
+[k8s_defaults(
+    name = "k8s_" + kind,
+    cluster = _CLUSTER,
+    #context = _CONTEXT,
+    kind = kind,
+    namespace = _NAMESPACE,
+) for kind in [
+    "deploy",
+    "service",
+    "secret",
+    "priority_class",
+    "pod",
+]]
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
 
@@ -29,6 +87,10 @@ load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 gazelle_dependencies()
 
+load("@com_github_atlassian_bazel_tools//gometalinter:deps.bzl", "gometalinter_dependencies")
+
+gometalinter_dependencies()
+
 load(
     "@io_bazel_rules_docker//go:image.bzl",
     _go_image_repos = "repositories",
@@ -36,7 +98,110 @@ load(
 
 _go_image_repos()
 
+git_repository(
+    name = "io_kubernetes_build",
+    commit = "4ce715fbe67d8fbed05ec2bb47a148e754100a4b",
+    remote = "https://github.com/kubernetes/repo-infra.git",
+)
+
+git_repository(
+    name = "com_github_jmhodges_bazel_gomock",
+    commit = "5b73edb74e569ff404b3beffc809d6d9f205e0e4",
+    remote = "https://github.com/jmhodges/bazel_gomock.git",
+)
+
+go_repository(
+    name = "com_github_golang_mock",
+    commit = "503ea999614e3b9d10f0060b8182b6fc7ea664f8",
+    importpath = "github.com/golang/mock",
+)
+
 # External dependencies
+new_git_repository(
+    name = "mcl",
+    remote = "https://github.com/herumi/mcl",
+    commit = "fe95b63cc450bc1eb0459dda916a858b5442a258",
+    build_file_content = """
+cc_library(
+  name = "mcl-lib",
+  srcs = [
+    "src/bn_c256.cpp",
+    "src/bn_c384.cpp",
+    "src/bn_c512.cpp",
+    "src/ecdsa_c.cpp",
+    "src/fp.cpp",
+    "src/gen.cpp",
+    "src/she_c256.cpp",
+    "src/she_c384.cpp",
+  ],
+  hdrs = [
+    "src/bn_c_impl.hpp",
+    "src/fp_generator.hpp",
+    "src/llvm_gen.hpp",
+    "src/low_func.hpp",
+    "src/low_func_llvm.hpp",
+    "src/proto.hpp",
+    "src/she_c_impl.hpp",
+    "src/xbyak/xbyak.h",
+    "src/xbyak/xbyak_mnemonic.h",
+    "src/xbyak/xbyak_util.h",
+    "include/mcl/aggregate_sig.hpp",
+    "include/mcl/ahe.hpp",
+    "include/mcl/array.hpp",
+    "include/mcl/bn.h",
+    "include/mcl/bn.hpp",
+    "include/mcl/bn256.hpp",
+    "include/mcl/bn384.hpp",
+    "include/mcl/bn512.hpp",
+    "include/mcl/conversion.hpp",
+    "include/mcl/curve_type.h",
+    "include/mcl/ec.hpp",
+    "include/mcl/ecdsa.h",
+    "include/mcl/ecdsa.hpp",
+    "include/mcl/ecparam.hpp",
+    "include/mcl/elgamal.hpp",
+    "include/mcl/fp.hpp",
+    "include/mcl/fp_tower.hpp",
+    "include/mcl/gmp_util.hpp",
+    "include/mcl/lagrange.hpp",
+    "include/mcl/op.hpp",
+    "include/mcl/operator.hpp",
+    "include/mcl/paillier.hpp",
+    "include/mcl/randgen.hpp",
+    "include/mcl/she.h",
+    "include/mcl/she.hpp",
+    "include/mcl/util.hpp",
+    "include/mcl/vint.hpp",
+    "include/mcl/window_method.hpp",
+    "include/cybozu/array.hpp",
+    "include/cybozu/atoi.hpp",
+    "include/cybozu/benchmark.hpp",
+    "include/cybozu/bit_operation.hpp",
+    "include/cybozu/critical_section.hpp",
+    "include/cybozu/crypto.hpp",
+    "include/cybozu/endian.hpp",
+    "include/cybozu/exception.hpp",
+    "include/cybozu/hash.hpp",
+    "include/cybozu/inttype.hpp",
+    "include/cybozu/itoa.hpp",
+    "include/cybozu/link_libeay32.hpp",
+    "include/cybozu/link_mpir.hpp",
+    "include/cybozu/link_ssleay32.hpp",
+    "include/cybozu/mutex.hpp",
+    "include/cybozu/option.hpp",
+    "include/cybozu/random_generator.hpp",
+    "include/cybozu/serializer.hpp",
+    "include/cybozu/sha2.hpp",
+    "include/cybozu/stream.hpp",
+    "include/cybozu/test.hpp",
+    "include/cybozu/unordered_map.hpp",
+    "include/cybozu/xorshift.hpp",
+  ],
+  includes = ["include", "src/xbyak"],
+  visibility = ["//visibility:public"],
+)
+"""
+)
 
 go_repository(
     name = "com_github_ethereum_go_ethereum",
@@ -48,8 +213,14 @@ go_repository(
     # code.
     remote = "https://github.com/prysmaticlabs/bazel-go-ethereum",
     vcs = "git",
-    # Last updated July 15, 2018
-    commit = "fad71da72e539ff79183a5d548b105c73ce4969f",
+    # Last updated September 09, 2018
+    commit = "f4b3f83362a4cf2928e57914af040aea76c8a7d6",
+)
+
+git_repository(
+    name = "com_github_prysmaticlabs_bls",
+    remote = "https://github.com/prysmaticlabs/bls",
+    commit = "c1480823a672f5f73f2389ceb08bb1281a64c198",
 )
 
 go_repository(
@@ -518,4 +689,52 @@ go_repository(
     name = "com_github_syndtr_goleveldb",
     commit = "c4c61651e9e37fa117f53c5a906d3b63090d8445",
     importpath = "github.com/syndtr/goleveldb",
+)
+
+go_repository(
+    name = "com_github_libp2p_go_libp2p_blankhost",
+    commit = "073f507db72de824e981aa0f15f158175a8d6be1",
+    importpath = "github.com/libp2p/go-libp2p-blankhost",
+)
+
+go_repository(
+    name = "com_github_steakknife_hamming",
+    commit = "c99c65617cd3d686aea8365fe563d6542f01d940",
+    importpath = "github.com/steakknife/hamming",
+)
+
+go_repository(
+    name = "io_opencensus_go",
+    commit = "f21fe3feadc5461b952191052818685a410428d4",
+    importpath = "go.opencensus.io",
+)
+
+go_repository(
+    name = "org_golang_google_api",
+    commit = "7ca32eb868bf53ea2fc406698eb98583a8073d19",
+    importpath = "google.golang.org/api",
+)
+
+go_repository(
+    name = "org_golang_x_sync",
+    commit = "1d60e4601c6fd243af51cc01ddf169918a5407ca",
+    importpath = "golang.org/x/sync",
+)
+
+go_repository(
+    name = "com_github_golang_lint",
+    commit = "06c8688daad7faa9da5a0c2f163a3d14aac986ca",
+    importpath = "github.com/golang/lint",
+)
+
+go_repository(
+    name = "org_golang_x_lint",
+    commit = "06c8688daad7faa9da5a0c2f163a3d14aac986ca",
+    importpath = "golang.org/x/lint",
+)
+
+go_repository(
+    name = "com_github_aristanetworks_goarista",
+    commit = "ff33da284e760fcdb03c33d37a719e5ed30ba844",
+    importpath = "github.com/aristanetworks/goarista",
 )

@@ -6,10 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/sirupsen/logrus"
 )
-
-var log = logrus.WithField("prefix", "db")
 
 // KVStore is an in-memory mapping of hashes to RLP encoded values.
 type KVStore struct {
@@ -61,13 +58,11 @@ func (s *KVStore) Delete(k []byte) error {
 
 // Close satisfies ethdb.Database.
 func (s *KVStore) Close() {
-	//TODO: Implement Close for KVStore
 	log.Debug("ShardKV Close() isnt implemented yet")
 }
 
 // NewBatch satisfies ethdb.Database.
 func (s *KVStore) NewBatch() ethdb.Batch {
-	//TODO: Implement NewBatch for KVStore
 	log.Debug("ShardKV NewBatch() isnt implemented yet")
 	return nil
 }
