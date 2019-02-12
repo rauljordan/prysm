@@ -5,11 +5,11 @@ package client
 import (
 	"context"
 	"fmt"
+	"github.com/prysmaticlabs/prysm/shared/hashutil"
 
 	ptypes "github.com/gogo/protobuf/types"
 	"github.com/opentracing/opentracing-go"
 	pbp2p "github.com/prysmaticlabs/prysm/proto/beacon/p2p/v1"
-	"github.com/prysmaticlabs/prysm/shared/ssz"
 )
 
 // ProposeBlock A new beacon block for a given slot. This method collects the
@@ -28,7 +28,7 @@ func (v *validator) ProposeBlock(ctx context.Context, slot uint64) {
 		log.Errorf("Failed to fetch CanonicalHead: %v", err)
 		return
 	}
-	parentTreeHash, err := ssz.TreeHash(headBlock)
+	parentTreeHash, err := hashutil.HashBeaconBlock(headBlock) // TODO: Use tree hashing in storing blocks as well.
 	if err != nil {
 		log.Errorf("Failed to hash parent block: %v", err)
 		return

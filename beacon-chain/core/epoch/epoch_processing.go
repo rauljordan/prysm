@@ -77,6 +77,7 @@ func ProcessEth1Data(state *pb.BeaconState) *pb.BeaconState {
 	if helpers.NextEpoch(state)%params.BeaconConfig().Eth1DataVotingPeriod == 0 {
 		for _, eth1DataVote := range state.Eth1DataVotes {
 			if eth1DataVote.VoteCount*2 > params.BeaconConfig().Eth1DataVotingPeriod {
+				// TODO: This can be nil and panic.
 				state.LatestEth1Data.DepositRootHash32 = eth1DataVote.Eth1Data.DepositRootHash32
 				state.LatestEth1Data.BlockHash32 = eth1DataVote.Eth1Data.BlockHash32
 			}
