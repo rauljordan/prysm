@@ -100,7 +100,9 @@ func (bs *BeaconServer) LatestAttestation(req *ptypes.Empty, stream pb.BeaconSer
 // block proposal.
 // TODO(1463): Implement this.
 func (bs *BeaconServer) Eth1Data(ctx context.Context, _ *ptypes.Empty) (*pb.Eth1DataResponse, error) {
-	return &pb.Eth1DataResponse{}, nil
+	return &pb.Eth1DataResponse{
+		Eth1Data: nil,
+	}, nil
 }
 
 // PendingDeposits returns a list of pending deposits that are ready for
