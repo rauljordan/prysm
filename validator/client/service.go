@@ -81,6 +81,7 @@ func (v *ValidatorService) Start() {
 		beaconClient:    pb.NewBeaconServiceClient(v.conn),
 		validatorClient: pb.NewValidatorServiceClient(v.conn),
 		attesterClient:  pb.NewAttesterServiceClient(v.conn),
+		proposerClient: pb.NewProposerServiceClient(v.conn),
 		key:             v.key,
 	}
 	go run(v.ctx, v.validator)
